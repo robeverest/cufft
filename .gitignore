@@ -1,0 +1,6 @@
+.DS_Store
+/config.log
+/config.status
+/cufft.buildinfo
+/configure
+/dist/

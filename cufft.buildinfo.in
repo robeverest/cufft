@@ -1,0 +1,4 @@
+ghc-options: -optc@cuda_cppflags@
+cc-options: @cuda_cppflags@
+ld-options: @cuda_ldflags@
+x-extra-c2hs-options: @cuda_c2hsflags@
