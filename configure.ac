@@ -11,18 +11,60 @@ AC_CANONICAL_TARGET
 # prefix to the include and library search directories. Additionally, set nvcc
 # as the C preprocessor for c2hs (only, or it won't try to link cudart)
 #
-AC_PATH_PROG(NVCC, nvcc)
+AC_ARG_WITH([compiler], [Haskell compiler], [GHC=$withval],  [AC_PATH_PROG(GHC, ghc)])
+AC_ARG_WITH([nvcc],     [CUDA compiler],    [NVCC=$withval], [AC_PATH_PROG(NVCC, nvcc)])
+AC_ARG_WITH([gcc],      [C compiler],       [CC=$withval])
+
+# If NVCC is detected in the path, set the location of the toolkit relative to
+# that, otherwise choose the default
+#
 if test "$NVCC" != ""; then
     cuda_prefix="$(dirname "$(dirname "$NVCC")")"
     cuda_c2hsflags="--cpp="$NVCC" --cppopts=-E "
-    CPPFLAGS+=" "-I${cuda_prefix}/include" "
-#    CC=${NVCC}
-
-    case $target in
-    x86_64*) LDFLAGS+=" -L${cuda_prefix}/lib64 " ;;
-    *)       LDFLAGS+=" -L${cuda_prefix}/lib "   ;;
-    esac
+else
+    cuda_prefix="/usr/local/cuda"
 fi
+
+# Location of the toolkit binaries and libraries
+#
+cuda_inc_path="${cuda_prefix}/include"
+CPPFLAGS+=" -I${cuda_inc_path} "
+
+case $target_os in
+  darwin*)
+    cuda_lib_path="${cuda_prefix}/lib"
+    LDFLAGS+=" -Xlinker -rpath ${cuda_lib_path} "
+    #CPPFLAGS+=" -arch ${target_cpu} "
+    ;;
+  *)
+    case $target_cpu in
+      x86_64*)
+        cuda_lib_path="${cuda_prefix}/lib64"
+        #CPPFLAGS+=" -m64 "
+        ;;
+      *)
+        cuda_lib_path="${cuda_prefix}/lib"
+        #CPPFLAGS+=" -m32 "
+        ;;
+    esac
+    ;;
+esac
+LDFLAGS+=" -L${cuda_lib_path} "
+
+
+# The CUDA headers need to be interpreted relative to the architecture GHC is
+# compiled for, which might be different from the architecture of the host
+# machine (eg. 32-bit GHC on a 64-bit CPU).
+#
+AC_MSG_CHECKING(ghc architecture)
+target_ghc_arch=`${GHC} -ignore-dot-ghci -e "putStrLn System.Info.arch"`
+AC_MSG_RESULT(${target_ghc_arch})
+
+case $target_ghc_arch in
+  x86_64)       cuda_c2hsflags+="--cppopts=-m64 " ;;
+  i386)         cuda_c2hsflags+="--cppopts=-m32 " ;;
+  *)            ;;
+esac
 
 # Recent versions of Mac OS X (10.6 and later) provides a C extension for
 # creating lambda-like closure expressions (blocks), the syntax for which
@@ -39,14 +81,6 @@ if test "$BLOCKS" != ""; then
 else
     AC_MSG_RESULT(no)
 fi
-
-# If we are running on Mac OS add the CUDA library path to the search list. This
-# option allows applications to run without requiring to set [DY]LD_LIBRARY_PATH
-#
-case $build in
-    *darwin* ) LDFLAGS+=" -Xlinker -rpath ${cuda_prefix}/lib " ;;
-    * ) ;;
-esac
 
 # Make sure both the driver and runtime are found
 #
