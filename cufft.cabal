@@ -34,6 +34,7 @@ library
   other-modules:        Foreign.CUDA.FFT.Error
                         Foreign.CUDA.FFT.Plan
                         Foreign.CUDA.FFT.Execute
+                        Foreign.CUDA.FFT.Internal.C2HS
 
   build-depends:        base == 4.*,
                         cuda >= 0.4.1
@@ -44,3 +45,4 @@ library
 Source-repository head
   Type:                 git
   Location:             git://github.com/robeverest/cufft.git
+
