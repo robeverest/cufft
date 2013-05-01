@@ -64,7 +64,7 @@ plan2D nx ny t = resultIfOk =<< cufftPlan2d nx ny t
   where
     peekHdl = liftM Handle . peek
 
- -- | Creates a 3D FFT plan configuration for a specified signal size and data type.
+-- | Creates a 3D FFT plan configuration for a specified signal size and data type.
 --
 plan3D :: Int -> Int -> Int -> Type -> IO Handle
 plan3D nx ny nz t = resultIfOk =<< cufftPlan3d nx ny nz t
