@@ -13,7 +13,7 @@ description:         The CUFFT library is part of the CUDA developer toolkit.
 homepage:            http://github.com/robeverest/cufft
 license:             BSD3
 license-file:        LICENSE
-author:              Robert Clifton-Everest
+author:              Robert Clifton-Everest <robertce@cse.unsw.edu.au>
 maintainer:          Robert Clifton-Everest <robertce@cse.unsw.edu.au>
 
 category:            Foreign
