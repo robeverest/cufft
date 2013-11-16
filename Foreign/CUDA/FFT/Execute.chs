@@ -18,7 +18,7 @@ import Foreign.CUDA.Ptr
 import Foreign
 import Foreign.C
 
-#include <cufft.h>
+#include <cbits/wrap.h>
 {# context lib="cufft" #}
 
 -- | Executes a single-precision complex-to-complex transform plan in the

@@ -22,7 +22,7 @@ import Foreign
 import Foreign.C
 import Control.Monad                            ( liftM )
 
-#include <cufft.h>
+#include <cbits/wrap.h>
 {# context lib="cufft" #}
 
 

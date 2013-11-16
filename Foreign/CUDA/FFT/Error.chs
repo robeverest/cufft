@@ -9,7 +9,7 @@ module Foreign.CUDA.FFT.Error
 import Data.Typeable
 import Control.Exception
 
-#include <cufft.h>
+#include <cbits/wrap.h>
 {# context lib="cufft" #}
 
 
