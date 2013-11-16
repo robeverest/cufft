@@ -4,3 +4,6 @@
 /cufft.buildinfo
 /configure
 /dist/
+
+autom4te.cache/
+

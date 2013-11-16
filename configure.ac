@@ -112,5 +112,6 @@ cuda_ldflags="$LDFLAGS $LIBS "
 AC_SUBST([cuda_cppflags])
 AC_SUBST([cuda_ldflags])
 AC_SUBST([cuda_c2hsflags])
+AC_SUBST([cuda_lib_path])
 AC_OUTPUT
 
