@@ -44,7 +44,6 @@ library
   ghc-options:          -Wall -O2 -funbox-strict-fields -fwarn-tabs
 
   include-dirs:         .
-  extra-libraries:      cufft
 
 Source-repository head
   Type:                 git
