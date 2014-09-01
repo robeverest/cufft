@@ -17,7 +17,7 @@ author:              Robert Clifton-Everest <robertce@cse.unsw.edu.au>
 maintainer:          Robert Clifton-Everest <robertce@cse.unsw.edu.au>
 
 category:            Foreign
-build-type:          Configure
+build-type:          Custom
 cabal-version:       >=1.8
 
 Extra-tmp-files:        cufft.buildinfo config.status config.log
