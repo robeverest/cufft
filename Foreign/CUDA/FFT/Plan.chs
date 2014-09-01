@@ -9,6 +9,7 @@ module Foreign.CUDA.FFT.Plan (
   plan1D,
   plan2D,
   plan3D,
+  planMany,
   destroy,
 
 ) where
@@ -77,6 +78,30 @@ plan3D nx ny nz t = resultIfOk =<< cufftPlan3d nx ny nz t
   , cFromEnum `Type'            } -> `Result' cToEnum #}
   where
     peekHdl = liftM Handle . peek
+
+-- | Creates a batched plan configuration for many signals of a specified size in
+-- either 1, 2 or 3 dimensions, and of the specified data type.
+--
+planMany :: Int -> [Int] -> [Int] -> Int -> Int -> [Int] -> Int -> Int -> Type -> Int -> IO Handle
+planMany rank n inembed istride idist onembed ostride odist t batch
+  = resultIfOk =<< cufftPlanMany rank n inembed istride idist onembed ostride odist t batch
+
+{# fun unsafe cufftPlanMany
+  { alloca-   `Handle' peekHdl*
+  ,           `Int'
+  , asArray *  `[Int]' free*-
+  , asArray *  `[Int]' free*-
+  ,           `Int'
+  ,           `Int'
+  , asArray *  `[Int]' free*-
+  ,           `Int'
+  ,           `Int'
+  , cFromEnum `Type'
+  ,           `Int'} -> `Result' cToEnum #}
+  where
+    peekHdl = liftM Handle . peek
+    asArray [] f = f nullPtr
+    asArray xs f = withArray (map fromIntegral xs) f
 
 -- | This function releases hardware resources used by the CUFFT plan. The
 -- release of GPU resources may be deferred until the application exits. This
