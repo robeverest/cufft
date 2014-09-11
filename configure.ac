@@ -11,17 +11,21 @@ AC_CANONICAL_TARGET
 # prefix to the include and library search directories. Additionally, set nvcc
 # as the C preprocessor for c2hs (only, or it won't try to link cudart)
 #
-AC_ARG_WITH([compiler], [Haskell compiler], [GHC=$withval],  [AC_PATH_PROG(GHC, ghc)])
-AC_ARG_WITH([nvcc],     [CUDA compiler],    [NVCC=$withval], [AC_PATH_PROG(NVCC, nvcc)])
-AC_ARG_WITH([gcc],      [C compiler],       [CC=$withval])
+AC_ARG_WITH([compiler], [  --with-compiler=HC      use HC as the Haskell compiler],
+            [GHC=$withval],  [AC_PATH_PROG(GHC, ghc)])
+AC_ARG_WITH([nvcc],     [  --with-nvcc=NVCC        use NVCC as the CUDA compiler],
+            [NVCC=$withval], [AC_PATH_PROG(NVCC, nvcc, [], [$PATH:/usr/local/cuda/bin])])
+AC_ARG_WITH([gcc],      [  --with-gcc=CC           use CC as the C compiler],
+            [CC=$withval])
 
 # If NVCC is detected in the path, set the location of the toolkit relative to
 # that, otherwise choose the default
 #
 if test "$NVCC" != ""; then
     cuda_prefix="$(dirname "$(dirname "$NVCC")")"
-    cuda_c2hsflags="--cpp="$NVCC" --cppopts=-E "
+    cuda_c2hsflags="--cpp="$NVCC" --cppopts=-E --cppopts=-arch=sm_20 "
 else
+    echo "WARNING: Cannot find the CUDA compiler 'nvcc'. This is likely to cause problems."
     cuda_prefix="/usr/local/cuda"
 fi
 
@@ -33,7 +37,7 @@ CPPFLAGS+=" -I${cuda_inc_path} "
 case $target_os in
   darwin*)
     cuda_lib_path="${cuda_prefix}/lib"
-    LDFLAGS+=" -Xlinker -rpath ${cuda_lib_path} "
+    #LDFLAGS+=" -Xlinker -rpath ${cuda_lib_path} "
     #CPPFLAGS+=" -arch ${target_cpu} "
     ;;
   *)
@@ -71,6 +75,9 @@ esac
 # confuses the c2hs preprocessor. We disable this by undefining the __BLOCKS__
 # macro.
 #
+# NB: This test doesn't work with newer versions of Xcode/command lines tools anymore.
+#     However, other CPP magic keeps blocks at bay.
+#
 AC_MSG_CHECKING(for Apple Blocks extension)
 if test -r "/usr/include/stdlib.h"; then
     BLOCKS=`grep __BLOCKS__ /usr/include/stdlib.h`
@@ -106,12 +113,25 @@ AC_SEARCH_LIBS(cufftPlan1d, cufft, [], [AC_MSG_ERROR(could not find CUFFT librar
 
 # Populate the buildinfo, with the search paths and any target specific options
 #
-cuda_cppflags="$CPPFLAGS "
-cuda_ldflags="$LDFLAGS $LIBS "
+cuda_ccflags="$CPPFLAGS "
+cuda_ldflags="$LDFLAGS "
 
-AC_SUBST([cuda_cppflags])
+for x in $cuda_ccflags; do
+    cuda_ghcflags+="-optc${x} "
+done
+for x in $cuda_ldflags; do
+    cuda_ghcflags+="-optl${x} "
+done
+for x in $LIBS; do
+    cuda_libraries+="${x#-l} "
+done
+
+AC_SUBST([cuda_ghcflags])
+AC_SUBST([cuda_ccflags])
 AC_SUBST([cuda_ldflags])
 AC_SUBST([cuda_c2hsflags])
 AC_SUBST([cuda_lib_path])
+AC_SUBST([cuda_libraries])
+AC_SUBST([cuda_frameworks])
 AC_OUTPUT
 
