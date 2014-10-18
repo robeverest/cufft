@@ -89,11 +89,11 @@ planMany rank n inembed istride idist onembed ostride odist t batch
 {# fun unsafe cufftPlanMany
   { alloca-   `Handle' peekHdl*
   ,           `Int'
-  , asArray *  `[Int]' free*-
-  , asArray *  `[Int]' free*-
+  , asArray *  `[Int]'
+  , asArray *  `[Int]'
   ,           `Int'
   ,           `Int'
-  , asArray *  `[Int]' free*-
+  , asArray *  `[Int]'
   ,           `Int'
   ,           `Int'
   , cFromEnum `Type'
