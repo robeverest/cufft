@@ -22,6 +22,7 @@ import Foreign.CUDA.FFT.Internal.C2HS
 import Foreign
 import Foreign.C
 import Control.Monad                            ( liftM )
+import Data.Maybe
 
 #include <cbits/wrap.h>
 {# context lib="cufft" #}
@@ -82,9 +83,19 @@ plan3D nx ny nz t = resultIfOk =<< cufftPlan3d nx ny nz t
 -- | Creates a batched plan configuration for many signals of a specified size in
 -- either 1, 2 or 3 dimensions, and of the specified data type.
 --
-planMany :: Int -> [Int] -> [Int] -> Int -> Int -> [Int] -> Int -> Int -> Type -> Int -> IO Handle
-planMany rank n inembed istride idist onembed ostride odist t batch
-  = resultIfOk =<< cufftPlanMany rank n inembed istride idist onembed ostride odist t batch
+planMany :: [Int]                   -- ^ The size of each dimension
+         -> Maybe ([Int], Int, Int) -- ^ Storage dimensions of the output data,
+                                    -- the stride, and the distance between
+                                    -- signals for the input data
+         -> Maybe ([Int], Int, Int) -- ^ As above but for the output data
+         -> Type                    -- ^ The type of the transformation.
+         -> Int                     -- ^ The batch size (either 1, 2 or 3)
+         -> IO Handle
+planMany n ilayout olayout t batch
+  = do
+      let (inembed, istride, idist) = fromMaybe ([], 0, 0) ilayout
+      let (onembed, ostride, odist) = fromMaybe ([], 0, 0) olayout
+      resultIfOk =<< cufftPlanMany (length n) n inembed istride idist onembed ostride odist t batch
 
 {# fun unsafe cufftPlanMany
   { alloca-   `Handle' peekHdl*
