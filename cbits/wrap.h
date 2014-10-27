@@ -15,6 +15,7 @@
 #define __OSX_AVAILABLE_BUT_DEPRECATED(_macIntro, _macDep, _iphoneIntro, _iphoneDep)
 #endif
 
+#include <cuda.h>
 #include <cufft.h>
 
 #endif
