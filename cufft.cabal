@@ -2,7 +2,7 @@
 --  see http://haskell.org/cabal/users-guide/
 
 name:                cufft
-version:             0.1.0.3
+version:             0.1.1.0
 synopsis:            Haskell bindings for the CUFFT library
 description:         The CUFFT library is part of the CUDA developer toolkit.
                      .
