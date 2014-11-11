@@ -21,7 +21,7 @@ cIntConv  = fromIntegral
 
 -- | Floating conversion
 --
-{-# INLINE cFloatConv #-}
+{-# INLINE[1] cFloatConv #-}
 cFloatConv :: (RealFloat a, RealFloat b) => a -> b
 cFloatConv  = realToFrac
 -- As this conversion by default goes via `Rational', it can be very slow...
