@@ -33,12 +33,13 @@ library
   exposed-modules:      Foreign.CUDA.FFT
 
   other-modules:        Foreign.CUDA.FFT.Error
-                        Foreign.CUDA.FFT.Plan
                         Foreign.CUDA.FFT.Execute
+                        Foreign.CUDA.FFT.Plan
+                        Foreign.CUDA.FFT.Stream
                         Foreign.CUDA.FFT.Internal.C2HS
 
   build-depends:        base == 4.*,
-                        cuda >= 0.4.1
+                        cuda >= 0.6.6
 
   build-tools:          c2hs >= 0.16
   ghc-options:          -Wall -O2 -funbox-strict-fields -fwarn-tabs
