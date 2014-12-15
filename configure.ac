@@ -22,8 +22,24 @@ AC_ARG_WITH([gcc],      [  --with-gcc=CC           use CC as the C compiler],
 # that, otherwise choose the default
 #
 if test "$NVCC" != ""; then
+	case $target in
+		*mingw* )
+		# We need a Windows-style path, but mingw doesn't include cygpath,
+		# thus this hack.
+		NVCC=`cd $(dirname $NVCC) && pwd -W`/$(basename nvcc)
+		;;
+	esac
+
     cuda_prefix="$(dirname "$(dirname "$NVCC")")"
-    cuda_c2hsflags="--cpp="$NVCC" --cppopts=-E --cppopts=-arch=sm_20 "
+		
+	case $target in
+		*mingw* )
+			cuda_c2hsflags="--cppopts=-E --cppopts=-arch=sm_20 --cppopts="-D${target_os}_TARGET_OS=1" "
+			;;
+		* )
+			cuda_c2hsflags="--cpp="$NVCC" --cppopts=-E --cppopts=-arch=sm_20 "
+			;;
+	esac
 else
     echo "WARNING: Cannot find the CUDA compiler 'nvcc'. This is likely to cause problems."
     cuda_prefix="/usr/local/cuda"
@@ -40,6 +56,16 @@ case $target_os in
     #LDFLAGS+=" -Xlinker -rpath ${cuda_lib_path} "
     #CPPFLAGS+=" -arch ${target_cpu} "
     ;;
+  mingw*)
+    case $target_cpu in
+	  x86_64*)
+	    cuda_lib_path="${cuda_prefix}/lib/x64"
+		;;
+	  *)
+		cuda_lib_path="${cuda_prefix}/lib/Win32"
+		;;
+	esac
+	;;
   *)
     case $target_cpu in
       x86_64*)
@@ -109,7 +135,22 @@ often require both "lib64" and "lib" library paths, in that order.
 ********************************************************************************'
 
 AC_CHECK_HEADERS([cufft.h],        [], [AC_MSG_ERROR(could not find CUFFT headers${longerror})])
-AC_SEARCH_LIBS(cufftPlan1d, cufft, [], [AC_MSG_ERROR(could not find CUFFT library${longerror})])
+case $target in
+	*mingw32* )
+		# AC_SEARCH_LIBS doesn't work on Win32 with functions that use the
+		# stdcall calling convention, so we use AC_CHECK_DELCS instead.
+		LIBS+="-lcufft"
+		AC_CHECK_DECLS([cufftPlan1d],
+		[],
+		[AC_MSG_ERROR(could not find CUFFT library${longerror})],
+		[[#include <cufft.h>]])
+	
+		cuda_ghci_libs+="`nm ${cuda_lib_path}/cufft.lib | head -2 | tail -1 | sed -e 's/://' -e 's/.dll//'` "
+		;;
+	*)
+		AC_SEARCH_LIBS(cufftPlan1d, cufft, [], [AC_MSG_ERROR(could not find CUFFT library${longerror})])
+		;;
+esac
 
 # Populate the buildinfo, with the search paths and any target specific options
 #
@@ -133,5 +174,6 @@ AC_SUBST([cuda_c2hsflags])
 AC_SUBST([cuda_lib_path])
 AC_SUBST([cuda_libraries])
 AC_SUBST([cuda_frameworks])
+AC_SUBST([cuda_ghci_libs])
 AC_OUTPUT
 
