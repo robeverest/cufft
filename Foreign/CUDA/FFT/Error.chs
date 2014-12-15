@@ -22,21 +22,25 @@ import Control.Exception
 -- Describe each error code
 --
 describe :: Result -> String
-describe Success         = "success"
-describe InvalidPlan     = "invalid plan handle"
-describe AllocFailed     = "resource allocation failed"
-describe InvalidType     = "no longer used"
-describe InvalidValue    = "unsupported value or parameter passed to a function"
-describe InternalError   = "internal error"
-describe ExecFailed      = "failed to execute an FFT on the GPU"
-describe SetupFailed     = "the CUFFT library failed to initialize"
-describe InvalidSize     = "invalid transform size"
-describe UnalignedData   = "no longer used"
+describe Success                 = "success"
+describe InvalidPlan             = "invalid plan handle"
+describe AllocFailed             = "resource allocation failed"
+describe InvalidType             = "no longer used"
+describe InvalidValue            = "unsupported value or parameter passed to a function"
+describe InternalError           = "internal error"
+describe ExecFailed              = "failed to execute an FFT on the GPU"
+describe SetupFailed             = "the CUFFT library failed to initialize"
+describe InvalidSize             = "invalid transform size"
+describe UnalignedData           = "no longer used"
 #if CUDA_VERSION >= 6000
 describe IncompleteParameterList = "missing parameters in call"
-describe InvalidDevice   = "execution of a plan was on different GPU than plan creation"
-describe ParseError      = "internal plan database error"
-describe NoWorkspace     = "no workspace has been provided prior to plan execution"
+describe InvalidDevice           = "execution of a plan was on a different GPU than plan creation"
+describe ParseError              = "internal plan database error"
+describe NoWorkspace             = "no workspace has been provided prior to plan execution"
+#endif
+#if CUDA_VERSION >= 6050
+describe NotImplemented          = "not implemented"
+describe LicenseError            = "cufft license error"
 #endif
 
 
@@ -78,3 +82,4 @@ nothingIfOk status =
     case status of
         Success -> return  ()
         _       -> throwIO (ExitCode status)
+

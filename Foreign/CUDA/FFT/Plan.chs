@@ -124,3 +124,4 @@ destroy ctx = nothingIfOk =<< cufftDestroy ctx
 
 {# fun unsafe cufftDestroy
   { useHandle `Handle' } -> `Result' cToEnum #}
+
