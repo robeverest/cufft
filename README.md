@@ -1,7 +1,7 @@
 Haskell FFI Bindings to CUDA FFT
 ================================
 
-[![Build status](https://travis-ci.org/tmcdonell/cufft.svg?branch=master)](https://travis-ci.org/tmcdonell/cufft)
+[![Build Status](https://travis-ci.org/robeverest/cufft.svg)](https://travis-ci.org/robeverest/cufft)
 
 The CUFFT library provides high performance implementations of Fast Fourier
 Transform (FFT) operations on NVIDIA GPUs. This is a collection of bindings to
