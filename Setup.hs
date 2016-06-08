@@ -123,7 +123,7 @@ updateLibraryRPATHs verbosity (Platform _ os) sharedLib extraLibDirs' =
     exists <- doesFileExist sharedLib
     unless exists $ die $ printf "Unexpected failure: library does not exist: %s" sharedLib
     --
-    mint   <- findProgramLocation verbosity "install_name_tool"
+    mint   <- findProgram verbosity "install_name_tool"
     case mint of
       Nothing                -> notice verbosity $ "Could not locate 'install_name_tool' in order to update LC_RPATH entries. This is likely to cause problems later on."
       Just install_name_tool ->
@@ -258,10 +258,17 @@ defaultCUDAInstallPath _ = "/usr/local/cuda"  -- windows?
 --
 findProgramLocationOrError :: Verbosity -> String -> IO FilePath
 findProgramLocationOrError verbosity execName = do
-  location <- findProgramLocation verbosity execName
+  location <- findProgram verbosity execName
   case location of
     Just path -> return path
     Nothing   -> ioError $ mkIOError doesNotExistErrorType ("not found: " ++ execName) Nothing Nothing
+
+findProgram :: Verbosity -> FilePath -> IO (Maybe FilePath)
+findProgram verbosity prog = do
+  result <- findProgramOnSearchPath verbosity defaultProgramSearchPath prog
+  case result of
+    Nothing       -> return Nothing
+    Just (path,_) -> return (Just path)
 
 
 cudaNotFoundMsg :: String
