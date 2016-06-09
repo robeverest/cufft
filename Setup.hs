@@ -98,7 +98,6 @@ main = defaultMainWithHooks customHooks
           sharedLib           = buildDir lbi </> mkSharedLibName cid uid
           Just extraLibDirs'  = extraLibDirs . libBuildInfo <$> library pkg_descr
       --
-      noExtraFlags args
       updateLibraryRPATHs verbosity platform sharedLib extraLibDirs'
 
 
