@@ -52,7 +52,7 @@ library
       base              == 4.*
     , cuda              >= 0.6.6
 
-  build-tools:          c2hs >= 0.26
+  build-tools:          c2hs >= 0.21
   ghc-options:          -Wall -O2 -funbox-strict-fields -fwarn-tabs
 
   include-dirs:         .

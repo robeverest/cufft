@@ -313,7 +313,8 @@ libraryBuildInfo installPath platform@(Platform arch os) ghcVersion = do
                             X86_64 -> "-m64"
                             _      -> ""
       emptyCase         = ["-DUSE_EMPTY_CASE" | versionBranch ghcVersion >= [7,8]]
-      c2hsOptions       = unwords $ map ("--cppopts="++) ("-E" : archFlag : emptyCase)
+      blocksExtension   = ["-U__BLOCKS__" | os == OSX ]
+      c2hsOptions       = unwords $ map ("--cppopts="++) ("-E" : archFlag : emptyCase ++ blocksExtension)
       c2hsExtraOptions  = ("x-extra-c2hs-options", c2hsOptions)
 
       addSystemSpecificOptions :: BuildInfo -> IO BuildInfo
@@ -323,10 +324,6 @@ libraryBuildInfo installPath platform@(Platform arch os) ghcVersion = do
           -- field with the mangled .dll names. I'm not sure what those are for
           -- this library, so left out for the time being.
           Windows -> return bi
-
-          -- In the CUDA package used to add the framework option (not needed
-          -- here) and extra CPP flags to deal with the Blocks extension (taken
-          -- care of by newer versions of c2hs).
           OSX     -> return bi
           _       -> return bi
 
