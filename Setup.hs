@@ -89,7 +89,7 @@ main = defaultMainWithHooks customHooks
 
     -- This hook fixes the embedded LC_RPATHs in the generated .dylib on OSX.
     postBuildHook :: Args -> BuildFlags -> PackageDescription -> LocalBuildInfo -> IO ()
-    postBuildHook args flags pkg_descr lbi = do
+    postBuildHook _ flags pkg_descr lbi = do
       let
           verbosity           = fromFlag (buildVerbosity flags)
           platform            = hostPlatform lbi
