@@ -24,7 +24,7 @@ homepage:               https://github.com/robeverest/cufft
 bug-reports:            https://github.com/robeverest/cufft/issues
 category:               Foreign
 build-type:             Custom
-cabal-version:          >= 1.24
+cabal-version:          >= 1.22
 tested-with:            GHC >= 7.6
 
 Extra-tmp-files:        cufft.buildinfo.generated
@@ -35,7 +35,7 @@ Extra-source-files:     cbits/wrap.h
 custom-setup
   setup-depends:
       base              >= 4.6
-    , Cabal             >= 1.24
+    , Cabal             >= 1.22
     , directory         >= 1.0
     , filepath          >= 1.0
 
