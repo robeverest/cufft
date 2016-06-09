@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 
 import Distribution.PackageDescription
 import Distribution.PackageDescription.Parse
@@ -23,11 +22,6 @@ import System.FilePath
 import System.IO.Error
 import Text.Printf
 import Prelude
-
--- Only defined for Cabal >= 1.24
-#ifndef MIN_VERSION_Cabal
-#define MIN_VERSION_Cabal(x,y,z) 0
-#endif
 
 
 -- Configuration
@@ -100,11 +94,7 @@ main = defaultMainWithHooks customHooks
           verbosity           = fromFlag (buildVerbosity flags)
           platform            = hostPlatform lbi
           cid                 = compilerId (compiler lbi)
-#if MIN_VERSION_Cabal(1,24,0)
           uid                 = localUnitId lbi
-#else
-          [uid]               = componentLibraries (getComponentLocalBuildInfo lbi CLibName)
-#endif
           sharedLib           = buildDir lbi </> mkSharedLibName cid uid
           Just extraLibDirs'  = extraLibDirs . libBuildInfo <$> library pkg_descr
       --
@@ -251,7 +241,7 @@ candidateCUDAInstallPaths verbosity platform =
   where
     findInPath :: IO FilePath
     findInPath = do
-      nvccPath <- findProgramOrError verbosity "nvcc"
+      nvccPath <- findProgramLocationOrError verbosity "nvcc"
       -- The obtained path is likely TOOLKIT/bin/nvcc. We want to extract the
       -- TOOLKIT part
       return (takeDirectory $ takeDirectory nvccPath)
@@ -267,20 +257,19 @@ defaultCUDAInstallPath _ = "/usr/local/cuda"  -- windows?
 -- NOTE: this function throws an exception when there is no `nvcc` in PATH.
 -- The exception contains a meaningful message.
 --
-findProgramOrError :: Verbosity -> String -> IO FilePath
-findProgramOrError verbosity execName = do
+findProgramLocationOrError :: Verbosity -> String -> IO FilePath
+findProgramLocationOrError verbosity execName = do
   location <- findProgram verbosity execName
   case location of
     Just path -> return path
     Nothing   -> ioError $ mkIOError doesNotExistErrorType ("not found: " ++ execName) Nothing Nothing
 
 findProgram :: Verbosity -> FilePath -> IO (Maybe FilePath)
-findProgram verbosity prog =
-#if MIN_VERSION_Cabal(1,24,0)
-  fmap fst <$> findProgramOnSearchPath verbosity defaultProgramSearchPath prog
-#else
-  findProgramLocation verbosity prog
-#endif
+findProgram verbosity prog = do
+  result <- findProgramOnSearchPath verbosity defaultProgramSearchPath prog
+  case result of
+    Nothing       -> return Nothing
+    Just (path,_) -> return (Just path)
 
 
 cudaNotFoundMsg :: String
