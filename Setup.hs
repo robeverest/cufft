@@ -33,6 +33,9 @@ customBuildInfoFilePath = "cufft" <.> "buildinfo"
 generatedBuldInfoFilePath :: FilePath
 generatedBuldInfoFilePath = customBuildInfoFilePath <.> "generated"
 
+defaultCUDAInstallPath :: Platform -> FilePath
+defaultCUDAInstallPath _ = "/usr/local/cuda"  -- windows?
+
 
 -- Build setup
 -- -----------
@@ -247,10 +250,6 @@ candidateCUDAInstallPaths verbosity platform =
 
     defaultPath :: FilePath
     defaultPath = defaultCUDAInstallPath platform
-
-
-defaultCUDAInstallPath :: Platform -> FilePath
-defaultCUDAInstallPath _ = "/usr/local/cuda"  -- windows?
 
 
 -- NOTE: this function throws an exception when there is no `nvcc` in PATH.
