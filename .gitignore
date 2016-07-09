@@ -1,9 +1,7 @@
 .DS_Store
-/config.log
-/config.status
 /cufft.buildinfo
-/configure
+/cufft.buildinfo.generated
 /dist/
-
-autom4te.cache/
-
+.stack-work
+.cabal-sandbox
+cabal.sandbox.config
