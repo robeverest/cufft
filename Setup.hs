@@ -118,8 +118,13 @@ main = defaultMainWithHooks customHooks
             localUnitId lbi
 #else
             $( case withinRange cabalVersion (orLaterVersion (Version [1,24] [])) of
-                 True  -> return ( AppE (VarE (mkName "localUnitId")) (VarE (mkName "lbi")) ) -- [| localUnitId lbi |]
-                 False -> [| head (componentLibraries (getComponentLocalBuildInfo lbi CLibName)) |]
+                 True  -> return ( AppE (VarE (mkName "localUnitId")) (VarE (mkName "lbi")) )
+                 False -> return ( AppE (VarE (mkName "head"))
+                                        (AppE (VarE (mkName ("componentLibraries")))
+                                        (AppE (AppE (VarE (mkName "getComponentLocalBuildInfo")) (VarE (mkName "lbi"))) (ConE (mkName "CLibName")))) )
+
+                 -- True  -> [| localUnitId lbi |] -- [| localUnitId lbi |]
+                 -- False -> [| head (componentLibraries (getComponentLocalBuildInfo lbi CLibName)) |]
              )
 #endif
           sharedLib           = buildDir lbi </> mkSharedLibName cid uid
