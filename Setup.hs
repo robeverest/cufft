@@ -123,7 +123,7 @@ main = defaultMainWithHooks customHooks
                                         (AppE (VarE (mkName ("componentLibraries")))
                                         (AppE (AppE (VarE (mkName "getComponentLocalBuildInfo")) (VarE (mkName "lbi"))) (ConE (mkName "CLibName")))) )
 
-                 -- True  -> [| localUnitId lbi |] -- [| localUnitId lbi |]
+                 -- True  -> [| localUnitId lbi |]
                  -- False -> [| head (componentLibraries (getComponentLocalBuildInfo lbi CLibName)) |]
              )
 #endif
