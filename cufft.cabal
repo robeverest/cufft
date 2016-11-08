@@ -12,7 +12,7 @@ description:
     The configure script will look for your CUDA installation in the standard
     places, and if the `nvcc` compiler is in your PATH, relative to that.
     .
-    This release tested with versions 6.5 and 7.0 of the CUDA toolkit.
+    This release tested with versions 6.5, 7.0, and 7.5 of the CUDA toolkit.
     .
 
 homepage:               http://github.com/robeverest/cufft
