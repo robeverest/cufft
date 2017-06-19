@@ -1,0 +1,15 @@
+# vim: nospell
+#
+resolver: lts-8.0
+
+packages:
+- '.'
+- location:
+    git:    https://github.com/tmcdonell/cuda.git
+    commit: 1bff17152088384b71a439b01ec993a54e2618c9
+  extra-dep: true
+
+extra-deps: []
+
+flags: {}
+
