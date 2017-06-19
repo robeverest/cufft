@@ -41,6 +41,8 @@ describe NoWorkspace             = "no workspace has been provided prior to plan
 #if CUDA_VERSION >= 6050
 describe NotImplemented          = "not implemented"
 describe LicenseError            = "cufft license error"
+#endif
+#if CUDA_VERSION >= 8000
 describe NotSupported            = "operation not supported for given parameters"
 #endif
 
