@@ -55,8 +55,15 @@ generatedBuildInfoFilePath = customBuildInfoFilePath <.> "generated"
 staticLibs :: Platform -> [String]
 staticLibs platform@(Platform _arch os) =
   case os of
-    Windows -> dynamicLibs platform
-    _       -> ["cufft_static", "culibos", "cudart_static", "pthread", "dl"]
+    _ -> dynamicLibs platform
+
+    -- TLM: I can't get this work at the moment. This package will build fine,
+    -- but client packages (e.g. accelerate-fft) will fail with an error such as:
+    --
+    -- > dyld: lazy symbol binding failed: Symbol not found: ___cudaRegisterLinkedBinary_72_tmpxft_000005ef_00000000_15_fft_dimension_class_multi_compute_60_cpp1_ii_466e44ab
+    --
+    -- Windows -> dynamicLibs platform
+    -- _       -> ["cufft_static", "cudart_static", "culibos", "pthread", "dl"]
 
 dynamicLibs :: Platform -> [String]
 dynamicLibs _ = ["cufft"]

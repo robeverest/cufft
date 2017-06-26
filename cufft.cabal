@@ -24,10 +24,12 @@ build-type:             Custom
 cabal-version:          >= 1.22
 tested-with:            GHC >= 7.6
 
-Extra-tmp-files:        cufft.buildinfo.generated
+Extra-tmp-files:
+    cufft.buildinfo.generated
 
-Extra-source-files:     cbits/wrap.h
-                        README.md
+Extra-source-files:
+    cbits/wrap.h
+    README.md
 
 custom-setup
   setup-depends:
