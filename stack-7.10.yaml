@@ -1,0 +1,12 @@
+# vim: nospell
+
+resolver: lts-6.30
+
+packages:
+- '.'
+
+extra-deps:
+- 'cuda-0.8.0.0'
+
+flags: {}
+

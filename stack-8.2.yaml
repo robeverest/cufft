@@ -1,0 +1,21 @@
+# vim: nospell
+#
+resolver: ghc-8.2
+
+packages:
+- '.'
+
+extra-deps:
+- 'c2hs-0.28.2'
+- 'cuda-0.8.0.0'
+- 'dlist-0.8.0.2'
+- 'half-0.2.2.3'
+- 'language-c-0.6.1'
+- 'storable-complex-0.2.2'
+- 'syb-0.7'
+
+flags: {}
+
+ghc-options:
+  '*': -fdiagnostics-color=always
+
