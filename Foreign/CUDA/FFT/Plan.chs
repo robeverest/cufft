@@ -36,10 +36,22 @@ import Data.Maybe
 {# context lib="cufft" #}
 
 
--- | Operations handle
+-- | A handle used to store and access cuFFT plans. A handle is created by the
+-- FFT planning functions (e.g. 'plan1D') and used to execute the plan.
 --
 newtype Handle = Handle { useHandle :: {# type cufftHandle #}}
 
+
+-- | The cuFFT library supports complex- and real-valued transforms. This data
+-- type enumerates the kind of transform a plan will execute.
+--
+-- Key:
+--
+--   * __R__: real (32-bit float)
+--   * __D__: double (64-bit float)
+--   * __C__: single-precision complex numbers (32-bit, interleaved)
+--   * __Z__: double-precision complex numbers (64-bit, interleaved)
+--
 {# enum cufftType as Type
   {}
   with prefix="CUFFT" deriving (Eq, Show) #}
@@ -47,89 +59,115 @@ newtype Handle = Handle { useHandle :: {# type cufftHandle #}}
 -- Context management ----------------------------------------------------------
 --
 
--- | Creates a 1D FFT plan configuration for a specified signal size and data type.
--- The third argument tells CUFFT how many 1D transforms to configure.
---
-plan1D :: Int -> Type -> Int -> IO Handle
-plan1D nx t batch = resultIfOk =<< cufftPlan1d nx t batch
+-- |
 
-{# fun unsafe cufftPlan1d
+-- | Creates a 1D FFT plan configured for a specified signal size and data type.
+--
+-- The third argument tells cuFFT how many 1D transforms, of size given by the
+-- first argument, to configure. Consider using 'planMany' for multiple
+-- transforms instead.
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftplan1d>
+--
+{-# INLINEABLE plan1D #-}
+{# fun unsafe cufftPlan1d as plan1D
   { alloca-   `Handle' peekHdl*
-  ,           `Int'
-  , cFromEnum `Type'
-  ,           `Int'             } -> `Result' cToEnum #}
+  ,           `Int'               -- ^ size of the transformation
+  , cFromEnum `Type'              -- ^ transformation data type
+  ,           `Int'               -- ^ number of one-dimensional transforms to configure
+  }
+  -> `()' checkStatus*- #}
   where
     peekHdl = liftM Handle . peek
+
 
 -- | Creates a 2D FFT plan configuration for a specified signal size and data type.
 --
-plan2D :: Int -> Int -> Type -> IO Handle
-plan2D nx ny t = resultIfOk =<< cufftPlan2d nx ny t
-
-{# fun unsafe cufftPlan2d
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftplan2d>
+--
+{-# INLINEABLE plan2D #-}
+{# fun unsafe cufftPlan2d as plan2D
   { alloca-   `Handle' peekHdl*
-  ,           `Int'
-  ,           `Int'
-  , cFromEnum `Type'            } -> `Result' cToEnum #}
+  ,           `Int'               -- ^ the transform size in the /x/-dimension. This is the slowest changing dimension of a transform (strided in memory)
+  ,           `Int'               -- ^ the transform size in the /y/-dimension. This is the fastest changing dimension of a transform (contiguous in memory)
+  , cFromEnum `Type'              -- ^ transformation data type
+  }
+  -> `()' checkStatus*- #}
   where
     peekHdl = liftM Handle . peek
+
 
 -- | Creates a 3D FFT plan configuration for a specified signal size and data type.
 --
-plan3D :: Int -> Int -> Int -> Type -> IO Handle
-plan3D nx ny nz t = resultIfOk =<< cufftPlan3d nx ny nz t
-
-{# fun unsafe cufftPlan3d
-  { alloca-   `Handle' peekHdl*
-  ,           `Int'
-  ,           `Int'
-  ,           `Int'
-  , cFromEnum `Type'            } -> `Result' cToEnum #}
-  where
-    peekHdl = liftM Handle . peek
-
--- | Creates a batched plan configuration for many signals of a specified size in
--- either 1, 2 or 3 dimensions, and of the specified data type.
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftplan3d>
 --
-planMany :: [Int]                   -- ^ The size of each dimension
-         -> Maybe ([Int], Int, Int) -- ^ Storage dimensions of the input data,
-                                    -- the stride, and the distance between
-                                    -- signals for the input data
-         -> Maybe ([Int], Int, Int) -- ^ As above but for the output data
-         -> Type                    -- ^ The type of the transformation.
-         -> Int                     -- ^ The batch size (either 1, 2 or 3)
-         -> IO Handle
-planMany n ilayout olayout t batch
-  = do
-      let (inembed, istride, idist) = fromMaybe ([], 0, 0) ilayout
-      let (onembed, ostride, odist) = fromMaybe ([], 0, 0) olayout
-      resultIfOk =<< cufftPlanMany (length n) n inembed istride idist onembed ostride odist t batch
-
-{# fun unsafe cufftPlanMany
+{-# INLINEABLE plan3D #-}
+{# fun unsafe cufftPlan3d as plan3D
   { alloca-   `Handle' peekHdl*
-  ,           `Int'
-  , asArray *  `[Int]'
-  , asArray *  `[Int]'
-  ,           `Int'
-  ,           `Int'
-  , asArray *  `[Int]'
-  ,           `Int'
-  ,           `Int'
-  , cFromEnum `Type'
-  ,           `Int'} -> `Result' cToEnum #}
+  ,           `Int'               -- ^ the transform size in the /x/-dimension. This is the slowest changing dimension of the transform (strided in memory)
+  ,           `Int'               -- ^ the transform size in the /y/-dimension.
+  ,           `Int'               -- ^ the transform size in the /z/-dimension. This is the fastest changing dimension of the transform (contiguous in memory)
+  , cFromEnum `Type'              -- ^ transformation data type
+  }
+  -> `()' checkStatus*- #}
   where
     peekHdl = liftM Handle . peek
+
+
+-- | Creates a batched plan configuration for many signals of a specified size
+-- and data type in either 1, 2 or 3 dimensions.
+--
+-- This function supports more complicated input and output data layouts. If not
+-- specified (that is, 'Nothing' is passed for either of the second or third
+-- parameters), contiguous data arrays are assumed.
+--
+-- Data layout configuration consists of three fields, respectively:
+--
+--   * storage dimensions of the input data in memory
+--   * the distance between two successive input elements in the innermost (least significant) dimension
+--   * the distance between the first element of two consecutive signals in a batch of the input data
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftplanmany>
+--
+planMany :: [Int]                   -- ^ the size of each dimension of the transform, with @(n !! 0)@ being the size of the outermost dimension, and @(n !! rank-1)@ the innermost (contiguous) dimension of the transform.
+         -> Maybe ([Int], Int, Int) -- ^ input data layout (if 'Nothing', the data is assumed to be contiguous)
+         -> Maybe ([Int], Int, Int) -- ^ output data layout (if 'Nothing', the data is stored contiguously)
+         -> Type                    -- ^ transformation type
+         -> Int                     -- ^ batch size for this transform
+         -> IO Handle
+planMany n ilayout olayout t batch =
+  cufftPlanMany (length n) n inembed istride idist onembed ostride odist t batch
+  where
+    (inembed, istride, idist) = fromMaybe ([], 0, 0) ilayout
+    (onembed, ostride, odist) = fromMaybe ([], 0, 0) olayout
+
+    peekHdl = liftM Handle . peek
+
     asArray [] f = f nullPtr
     asArray xs f = withArray (map fromIntegral xs) f
 
--- | This function releases hardware resources used by the CUFFT plan. The
--- release of GPU resources may be deferred until the application exits. This
--- function is usually the last call with a particular handle to the CUFFT
--- plan.
---
-destroy :: Handle -> IO ()
-destroy ctx = nothingIfOk =<< cufftDestroy ctx
+    {# fun unsafe cufftPlanMany
+      { alloca-   `Handle' peekHdl*
+      ,           `Int'
+      , asArray*  `[Int]'
+      , asArray*  `[Int]'
+      ,           `Int'
+      ,           `Int'
+      , asArray*  `[Int]'
+      ,           `Int'
+      ,           `Int'
+      , cFromEnum `Type'
+      ,           `Int'
+      }
+      -> `()' checkStatus*- #}
 
-{# fun unsafe cufftDestroy
-  { useHandle `Handle' } -> `Result' cToEnum #}
+
+-- | Release resources associated with the given plan. This function should be
+-- called once a plan is no longer needed, to avoid wasting GPU memory.
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftdestroy>
+--
+{-# INLINEABLE destroy #-}
+{# fun unsafe cufftDestroy as destroy
+  { useHandle `Handle' } -> `()' checkStatus*- #}
 
