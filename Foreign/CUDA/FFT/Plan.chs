@@ -40,7 +40,7 @@ import Data.Maybe
 --
 -- A handle is created by the FFT planning functions (e.g. 'plan1D') and used
 -- during execution of the transforms (e.g. 'Foreign.CUDA.FFT.Execute.execC2C').
--- Plans may be reused many times.
+-- Plans may be reused.
 --
 -- The plan should be 'destroy'ed once it is no longer required, in order to
 -- release associated GPU memory and other resources.

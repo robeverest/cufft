@@ -1,4 +1,3 @@
---------------------------------------------------------------------------------
 -- |
 -- Module      : Foreign.CUDA.FFT
 -- Copyright   : [2013..2018] Robert Clifton-Everest, Trevor L. McDonell
