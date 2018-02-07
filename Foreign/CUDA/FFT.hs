@@ -45,6 +45,6 @@ module Foreign.CUDA.FFT (
 
 import Foreign.CUDA.FFT.Error                                       ( CUFFTException(..) )
 import Foreign.CUDA.FFT.Execute
-import Foreign.CUDA.FFT.Plan
+import Foreign.CUDA.FFT.Plan                                        hiding ( useHandle )
 import Foreign.CUDA.FFT.Stream
 

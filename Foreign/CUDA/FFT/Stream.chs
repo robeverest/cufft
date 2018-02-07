@@ -12,6 +12,7 @@
 
 module Foreign.CUDA.FFT.Stream (
 
+  Stream,
   setStream,
 
 ) where
