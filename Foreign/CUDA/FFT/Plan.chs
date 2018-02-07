@@ -36,8 +36,14 @@ import Data.Maybe
 {# context lib="cufft" #}
 
 
--- | A handle used to store and access cuFFT plans. A handle is created by the
--- FFT planning functions (e.g. 'plan1D') and used to execute the plan.
+-- | A handle used to store and access cuFFT plans.
+--
+-- A handle is created by the FFT planning functions (e.g. 'plan1D') and used
+-- during execution of the transforms (e.g. 'Foreign.CUDA.FFT.Execute.execC2C').
+-- Plans may be reused many times.
+--
+-- The plan should be 'destroy'ed once it is no longer required, in order to
+-- release associated GPU memory and other resources.
 --
 newtype Handle = Handle { useHandle :: {# type cufftHandle #}}
 
@@ -72,9 +78,9 @@ newtype Handle = Handle { useHandle :: {# type cufftHandle #}}
 {-# INLINEABLE plan1D #-}
 {# fun unsafe cufftPlan1d as plan1D
   { alloca-   `Handle' peekHdl*
-  ,           `Int'               -- ^ size of the transformation
-  , cFromEnum `Type'              -- ^ transformation data type
-  ,           `Int'               -- ^ number of one-dimensional transforms to configure
+  ,           `Int'               -- ^ Size of the transformation
+  , cFromEnum `Type'              -- ^ Transformation data type
+  ,           `Int'               -- ^ Number of one-dimensional transforms to configure
   }
   -> `()' checkStatus*- #}
   where
@@ -88,9 +94,9 @@ newtype Handle = Handle { useHandle :: {# type cufftHandle #}}
 {-# INLINEABLE plan2D #-}
 {# fun unsafe cufftPlan2d as plan2D
   { alloca-   `Handle' peekHdl*
-  ,           `Int'               -- ^ the transform size in the /x/-dimension. This is the slowest changing dimension of a transform (strided in memory)
-  ,           `Int'               -- ^ the transform size in the /y/-dimension. This is the fastest changing dimension of a transform (contiguous in memory)
-  , cFromEnum `Type'              -- ^ transformation data type
+  ,           `Int'               -- ^ The transform size in the /x/-dimension. This is the slowest changing dimension of a transform (strided in memory)
+  ,           `Int'               -- ^ The transform size in the /y/-dimension. This is the fastest changing dimension of a transform (contiguous in memory)
+  , cFromEnum `Type'              -- ^ Transformation data type
   }
   -> `()' checkStatus*- #}
   where
@@ -104,10 +110,10 @@ newtype Handle = Handle { useHandle :: {# type cufftHandle #}}
 {-# INLINEABLE plan3D #-}
 {# fun unsafe cufftPlan3d as plan3D
   { alloca-   `Handle' peekHdl*
-  ,           `Int'               -- ^ the transform size in the /x/-dimension. This is the slowest changing dimension of the transform (strided in memory)
-  ,           `Int'               -- ^ the transform size in the /y/-dimension.
-  ,           `Int'               -- ^ the transform size in the /z/-dimension. This is the fastest changing dimension of the transform (contiguous in memory)
-  , cFromEnum `Type'              -- ^ transformation data type
+  ,           `Int'               -- ^ The transform size in the /x/-dimension. This is the slowest changing dimension of the transform (strided in memory)
+  ,           `Int'               -- ^ The transform size in the /y/-dimension.
+  ,           `Int'               -- ^ The transform size in the /z/-dimension. This is the fastest changing dimension of the transform (contiguous in memory)
+  , cFromEnum `Type'              -- ^ Transformation data type
   }
   -> `()' checkStatus*- #}
   where
@@ -129,11 +135,11 @@ newtype Handle = Handle { useHandle :: {# type cufftHandle #}}
 --
 -- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftplanmany>
 --
-planMany :: [Int]                   -- ^ the size of each dimension of the transform, with @(n !! 0)@ being the size of the outermost dimension, and @(n !! rank-1)@ the innermost (contiguous) dimension of the transform.
-         -> Maybe ([Int], Int, Int) -- ^ input data layout (if 'Nothing', the data is assumed to be contiguous)
-         -> Maybe ([Int], Int, Int) -- ^ output data layout (if 'Nothing', the data is stored contiguously)
-         -> Type                    -- ^ transformation type
-         -> Int                     -- ^ batch size for this transform
+planMany :: [Int]                   -- ^ The size of the transform in each dimension, where @(n !! 0)@ is the size of the outermost dimension, and @(n !! rank-1)@ the size of the innermost (contiguous) dimension of the transform.
+         -> Maybe ([Int], Int, Int) -- ^ Input data layout. If 'Nothing', the data is assumed to be contiguous.
+         -> Maybe ([Int], Int, Int) -- ^ Output data layout. If 'Nothing', the data is stored contiguously.
+         -> Type                    -- ^ Transformation type
+         -> Int                     -- ^ Batch size for this transform
          -> IO Handle
 planMany n ilayout olayout t batch =
   cufftPlanMany (length n) n inembed istride idist onembed ostride odist t batch

@@ -25,6 +25,12 @@
 -- The <http://hackage.haskell.org/package/cuda cuda> package can be used for
 -- writing to and retrieving data from the GPU.
 --
+-- For more information see <http://docs.nvidia.com/cuda/cufft/index.html>
+--
+-- [/Example/]
+--
+-- __TODO__
+--
 
 module Foreign.CUDA.FFT (
 
@@ -38,7 +44,7 @@ module Foreign.CUDA.FFT (
 
 ) where
 
-import Foreign.CUDA.FFT.Error
+import Foreign.CUDA.FFT.Error                                       ( CUFFTException(..) )
 import Foreign.CUDA.FFT.Execute
 import Foreign.CUDA.FFT.Plan
 import Foreign.CUDA.FFT.Stream
