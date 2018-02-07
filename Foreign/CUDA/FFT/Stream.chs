@@ -1,9 +1,17 @@
 {-# LANGUAGE CPP                      #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+-- |
+-- Module      : Foreign.CUDA.FFT.Stream
+-- Copyright   : [2013..2018] Robert Clifton-Everest, Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.CUDA.FFT.Stream (
 
-  -- * Streamed transforms
   setStream,
 
 ) where
@@ -20,6 +28,7 @@ import Foreign.C
 
 #include <cbits/wrap.h>
 {# context lib="cufft" #}
+
 
 -- | Associates a CUDA stream with a CUFFT plan. All kernel launches made during
 -- plan execution are now done through the associated stream, enabling overlap

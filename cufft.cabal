@@ -4,7 +4,7 @@ synopsis:               Haskell bindings for the CUFFT library
 description:
     This library contains FFI bindings to the CUFFT library, which provides
     highly optimised, FFTW compatible, Fast-Fourier Transform (FFT)
-    implementations for NVIDIA GPUs. The CUFFT library is part of the CUDA
+    implementations for NVIDIA GPUs. The cuFFT library is part of the CUDA
     developer toolkit.
     .
     <http://developer.nvidia.com/cuda-downloads>
@@ -47,17 +47,17 @@ library
 
   exposed-modules:
       Foreign.CUDA.FFT
-
-  other-modules:
       Foreign.CUDA.FFT.Error
       Foreign.CUDA.FFT.Execute
       Foreign.CUDA.FFT.Plan
       Foreign.CUDA.FFT.Stream
+
+  other-modules:
       Foreign.CUDA.FFT.Internal.C2HS
 
   build-depends:
       base                              == 4.*
-    , cuda                              >= 0.6.6
+    , cuda                              >= 0.8
 
   build-tools:
       c2hs                              >= 0.21

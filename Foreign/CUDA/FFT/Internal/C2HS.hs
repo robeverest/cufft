@@ -1,3 +1,12 @@
+-- |
+-- Module      : Foreign.CUDA.FFT.Internal.C2HS
+-- Copyright   : [2013..2018] Robert Clifton-Everest, Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.CUDA.FFT.Internal.C2HS (
 

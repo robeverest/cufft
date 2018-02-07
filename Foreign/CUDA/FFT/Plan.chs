@@ -1,9 +1,17 @@
 {-# LANGUAGE CPP                      #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+-- |
+-- Module      : Foreign.CUDA.FFT.Plan
+-- Copyright   : [2013..2018] Robert Clifton-Everest, Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.CUDA.FFT.Plan (
 
-  -- * Context
   Handle(..),
   Type(..),
   plan1D,
@@ -84,7 +92,7 @@ plan3D nx ny nz t = resultIfOk =<< cufftPlan3d nx ny nz t
 -- either 1, 2 or 3 dimensions, and of the specified data type.
 --
 planMany :: [Int]                   -- ^ The size of each dimension
-         -> Maybe ([Int], Int, Int) -- ^ Storage dimensions of the output data,
+         -> Maybe ([Int], Int, Int) -- ^ Storage dimensions of the input data,
                                     -- the stride, and the distance between
                                     -- signals for the input data
          -> Maybe ([Int], Int, Int) -- ^ As above but for the output data

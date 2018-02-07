@@ -1,10 +1,21 @@
 {-# LANGUAGE CPP                      #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+-- |
+-- Module      : Foreign.CUDA.FFT.Execute
+-- Copyright   : [2013..2018] Robert Clifton-Everest, Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.CUDA.FFT.Execute (
-  execC2C,execZ2Z,
-  execR2C,execD2Z,
-  execC2R,execZ2D,
+
+  execC2C, execZ2Z,
+  execR2C, execD2Z,
+  execC2R, execZ2D,
+
 ) where
 
 -- Friends
@@ -20,6 +31,7 @@ import Foreign.C
 
 #include <cbits/wrap.h>
 {# context lib="cufft" #}
+
 
 -- | Executes a single-precision complex-to-complex transform plan in the
 -- transform direction specified by the fourth argument
@@ -100,3 +112,4 @@ execZ2D ctx i o = nothingIfOk =<< cufftExecZ2D ctx i o
   , useDev     `DevicePtr Double' } -> `Result' cToEnum #}
   where
     useDev      = useDevicePtr . castDevPtr
+
