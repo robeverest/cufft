@@ -24,11 +24,15 @@
 -- The <http://hackage.haskell.org/package/cuda cuda> package can be used for
 -- writing to and retrieving data from the GPU.
 --
--- For more information see <http://docs.nvidia.com/cuda/cufft/index.html>
---
 -- [/Example/]
 --
--- __TODO__
+-- _TODO_
+--
+-- [/Additional information/]
+--
+-- For more information, see the NVIDIA cuFFT documentation:
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html>
 --
 
 module Foreign.CUDA.FFT (
