@@ -7,7 +7,7 @@ packages:
 - '.'
 
 extra-deps:
-- 'cuda-0.9.0.0'
+- 'cuda-0.9.0.1'
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
