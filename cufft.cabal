@@ -28,6 +28,7 @@ Extra-tmp-files:
 
 Extra-source-files:
     cbits/wrap.h
+    CHANGELOG.md
     README.md
 
 custom-setup
