@@ -9,7 +9,7 @@ packages:
 extra-deps:
 - 'alex-3.2.3'
 - 'c2hs-0.28.3'
-- 'cuda-0.9.0.2'
+- 'cuda-0.9.0.3'
 - 'dlist-0.8.0.4'
 - 'happy-1.19.9'
 - 'language-c-0.7.2'
