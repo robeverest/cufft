@@ -1,25 +1,40 @@
 {-# LANGUAGE CPP                      #-}
 {-# LANGUAGE DeriveDataTypeable       #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+-- |
+-- Module      : Foreign.CUDA.FFT.Error
+-- Copyright   : [2013..2018] Robert Clifton-Everest, Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.CUDA.FFT.Error
   where
 
--- System
-import Data.Typeable
+-- friends
+import Foreign.CUDA.FFT.Internal.C2HS
+
+-- system
 import Control.Exception
+import Data.Typeable
+import Foreign.C.Types
 
 #include <cbits/wrap.h>
 {# context lib="cufft" #}
 
 
--- Error codes -----------------------------------------------------------------
+-- | Error codes used by cuFFT library functions
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#cufftresult>
 --
 {# enum cufftResult as Result
   { underscoreToCase }
   with prefix="CUFFT" deriving (Eq, Show) #}
 
--- Describe each error code
+-- | Describe an error code
 --
 describe :: Result -> String
 describe Success                 = "success"
@@ -70,6 +85,7 @@ cufftError s = throwIO (UserError s)
 -- | Return the results of a function on successful execution, otherwise throw
 -- an exception with an error string associated with the return code
 --
+{-# INLINE resultIfOk #-}
 resultIfOk :: (Result, a) -> IO a
 resultIfOk (status,result) =
     case status of
@@ -80,9 +96,14 @@ resultIfOk (status,result) =
 -- | Throw an exception with an error string associated with an unsuccessful
 -- return code, otherwise return unit.
 --
+{-# INLINE nothingIfOk #-}
 nothingIfOk :: Result -> IO ()
 nothingIfOk status =
     case status of
         Success -> return  ()
         _       -> throwIO (ExitCode status)
+
+{-# INLINE checkStatus #-}
+checkStatus :: CInt -> IO ()
+checkStatus = nothingIfOk . cToEnum
 

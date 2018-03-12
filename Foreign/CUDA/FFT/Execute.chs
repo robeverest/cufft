@@ -1,102 +1,172 @@
 {-# LANGUAGE CPP                      #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
+-- |
+-- Module      : Foreign.CUDA.FFT.Execute
+-- Copyright   : [2013..2018] Robert Clifton-Everest, Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
 module Foreign.CUDA.FFT.Execute (
-  execC2C,execZ2Z,
-  execR2C,execD2Z,
-  execC2R,execZ2D,
+
+  Mode(..),
+
+  execC2C, execZ2Z,
+  execR2C, execD2Z,
+  execC2R, execZ2D,
+
 ) where
 
--- Friends
+-- friends
 import Foreign.CUDA.FFT.Error
 import Foreign.CUDA.FFT.Plan
 import Foreign.CUDA.FFT.Internal.C2HS
 
 import Foreign.CUDA.Ptr
 
--- System
+-- system
 import Foreign
 import Foreign.C
+import Data.Complex
 
 #include <cbits/wrap.h>
 {# context lib="cufft" #}
 
--- | Executes a single-precision complex-to-complex transform plan in the
--- transform direction specified by the fourth argument
+#c
+typedef enum cufftMode_enum {
+    CUFFT_MODE_FORWARD = CUFFT_FORWARD,
+    CUFFT_MODE_INVERSE = CUFFT_INVERSE
+} cufftMode;
+#endc
+
+-- | FFT transform direction
 --
-execC2C :: Handle -> DevicePtr Float -> DevicePtr Float -> Int -> IO ()
-execC2C ctx i o dir = nothingIfOk =<< cufftExecC2C ctx i o dir
+{# enum cufftMode as Mode
+  { underscoreToCase }
+  with prefix="CUFFT_MODE" deriving (Eq, Show, Bounded) #}
 
-{# fun unsafe cufftExecC2C
-  { useHandle  `Handle'
-  , useDev     `DevicePtr Float'
-  , useDev     `DevicePtr Float'
-  ,            `Int'             } -> `Result' cToEnum #}
-  where
-    useDev      = useDevicePtr . castDevPtr
 
--- | Executes a double-precision complex-to-complex transform plan in the
--- transform direction specified by the fourth argument
+-- | Executes a single-precision complex-to-complex transform.
 --
-execZ2Z :: Handle -> DevicePtr Double -> DevicePtr Double -> Int -> IO ()
-execZ2Z ctx i o dir = nothingIfOk =<< cufftExecZ2Z ctx i o dir
-
-{# fun unsafe cufftExecZ2Z
-  { useHandle  `Handle'
-  , useDev     `DevicePtr Double'
-  , useDev     `DevicePtr Double'
-  ,            `Int'             } -> `Result' cToEnum #}
-  where
-    useDev      = useDevicePtr . castDevPtr
-
--- | Executes a single-precision real-to-complex (implicitly forward)
--- transform plan
+-- If the input and output device pointers are the same, an in-place transform
+-- is executed.
 --
-execR2C :: Handle -> DevicePtr Float -> DevicePtr Float -> IO ()
-execR2C ctx i o = nothingIfOk =<< cufftExecR2C ctx i o
-
-{# fun unsafe cufftExecR2C
-  { useHandle  `Handle'
-  , useDev     `DevicePtr Float'
-  , useDev     `DevicePtr Float' } -> `Result' cToEnum #}
-  where
-    useDev      = useDevicePtr . castDevPtr
-
--- | Executes a double-precision real-to-complex (implicitly forward)
--- transform plan
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftexecc2c-cufftexecz2z>
 --
-execD2Z :: Handle -> DevicePtr Double -> DevicePtr Double -> IO ()
-execD2Z ctx i o = nothingIfOk =<< cufftExecD2Z ctx i o
-
-{# fun unsafe cufftExecD2Z
-  { useHandle  `Handle'
-  , useDev     `DevicePtr Double'
-  , useDev     `DevicePtr Double' } -> `Result' cToEnum #}
+{-# INLINEABLE execC2C #-}
+execC2C
+    :: Handle                     -- ^ plan handle, of type 'C2C'
+    -> Mode                       -- ^ transform direction
+    -> DevicePtr (Complex Float)  -- ^ input data
+    -> DevicePtr (Complex Float)  -- ^ output data
+    -> IO ()
+execC2C hdl dir i o = cufftExecC2C hdl i o dir
   where
-    useDev      = useDevicePtr . castDevPtr
+    {# fun unsafe cufftExecC2C
+      { useHandle     `Handle'
+      , useDevicePtr' `DevicePtr (Complex Float)'
+      , useDevicePtr' `DevicePtr (Complex Float)'
+      , cFromEnum     `Mode'
+      }
+      -> `()' checkStatus*- #}
 
--- | Executes a single-precision complex-to-real (implicitly forward)
--- transform plan
+
+-- | Executes a double-precision complex-to-complex transform.
 --
-execC2R :: Handle -> DevicePtr Float -> DevicePtr Float -> IO ()
-execC2R ctx i o = nothingIfOk =<< cufftExecC2R ctx i o
-
-{# fun unsafe cufftExecC2R
-  { useHandle  `Handle'
-  , useDev     `DevicePtr Float'
-  , useDev     `DevicePtr Float' } -> `Result' cToEnum #}
-  where
-    useDev      = useDevicePtr . castDevPtr
-
--- | Executes a double-precision complex-to-real (implicitly forward)
--- transform plan
+-- If the input and output device pointers are the same, an in-place transform
+-- is executed.
 --
-execZ2D :: Handle -> DevicePtr Double -> DevicePtr Double -> IO ()
-execZ2D ctx i o = nothingIfOk =<< cufftExecZ2D ctx i o
-
-{# fun unsafe cufftExecZ2D
-  { useHandle  `Handle'
-  , useDev     `DevicePtr Double'
-  , useDev     `DevicePtr Double' } -> `Result' cToEnum #}
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftexecc2c-cufftexecz2z>
+--
+{-# INLINEABLE execZ2Z #-}
+execZ2Z
+    :: Handle                     -- ^ plan handle, of type 'Z2Z'
+    -> Mode                       -- ^ transform direction
+    -> DevicePtr (Complex Double) -- ^ input data
+    -> DevicePtr (Complex Double) -- ^ output data
+    -> IO ()
+execZ2Z hdl dir i o = cufftExecZ2Z hdl i o dir
   where
-    useDev      = useDevicePtr . castDevPtr
+    {# fun unsafe cufftExecZ2Z
+      { useHandle     `Handle'
+      , useDevicePtr' `DevicePtr (Complex Double)'
+      , useDevicePtr' `DevicePtr (Complex Double)'
+      , cFromEnum     `Mode'
+      }
+      -> `()' checkStatus*- #}
+
+
+-- | Executes a single-precision real-to-complex, implicitly forward, transform.
+--
+-- If the input and output device pointers refer to the same address, an
+-- in-place transform is executed.
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftexecr2c-cufftexecd2z>
+--
+{-# INLINEABLE execR2C #-}
+{# fun unsafe cufftExecR2C as execR2C
+  { useHandle     `Handle'                      -- ^ plan handle, of type 'R2C'
+  , useDevicePtr' `DevicePtr Float'             -- ^ input data
+  , useDevicePtr' `DevicePtr (Complex Float)'   -- ^ output data
+  }
+  -> `()' checkStatus*- #}
+
+
+-- | Executes a double-precision real-to-complex, implicitly forward, transform.
+--
+-- If the input and output device pointers refer to the same address, an
+-- in-place transform is executed.
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftexecr2c-cufftexecd2z>
+--
+{-# INLINEABLE execD2Z #-}
+{# fun unsafe cufftExecD2Z as execD2Z
+  { useHandle     `Handle'                      -- ^ plan handle, of type 'D2Z'
+  , useDevicePtr' `DevicePtr Double'            -- ^ input data
+  , useDevicePtr' `DevicePtr (Complex Double)'  -- ^ output data
+  }
+  -> `()' checkStatus*- #}
+
+
+-- | Executes a single-precision complex-to-real, implicitly forward, transform.
+--
+-- If the input and output device pointers refer to the same address, an
+-- in-place transform is executed.
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftexecc2r-cufftexecz2d>
+--
+{-# INLINEABLE execC2R #-}
+{# fun unsafe cufftExecC2R as execC2R
+  { useHandle     `Handle'                      -- ^ plan handle, of type 'C2R'
+  , useDevicePtr' `DevicePtr (Complex Float)'   -- ^ input data
+  , useDevicePtr' `DevicePtr Float'             -- ^ output data
+  }
+  -> `()' checkStatus*- #}
+
+
+-- | Executes a double-precision complex-to-real, implicitly forward, transform.
+--
+-- If the input and output device pointers refer to the same address, an
+-- in-place transform is executed.
+--
+-- <http://docs.nvidia.com/cuda/cufft/index.html#function-cufftexecc2r-cufftexecz2d>
+--
+{-# INLINEABLE execZ2D #-}
+{# fun unsafe cufftExecZ2D as execZ2D
+  { useHandle     `Handle'                      -- ^ plan handle, of type 'Z2D'
+  , useDevicePtr' `DevicePtr (Complex Double)'  -- ^ input data
+  , useDevicePtr' `DevicePtr Double'            -- ^ output data
+  }
+  -> `()' checkStatus*- #}
+
+
+-- c2hs treats pointers to complex values as 'Ptr ()' (they are structs on the
+-- C side) and uses 'CFloat' instead of 'Float', etc.
+--
+{-# INLINE useDevicePtr' #-}
+useDevicePtr' :: DevicePtr a -> Ptr b
+useDevicePtr' = castPtr . useDevicePtr
+
