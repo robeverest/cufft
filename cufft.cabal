@@ -12,7 +12,6 @@ description:
     See the <https://travis-ci.org/tmcdonell/cublas travis-ci.org> build matrix
     for tested CUDA library versions.
 
-homepage:               http://github.com/robeverest/cufft
 license:                BSD3
 license-file:           LICENSE
 author:                 Robert Clifton-Everest, Trevor L. McDonell
@@ -21,7 +20,7 @@ homepage:               https://github.com/robeverest/cufft
 bug-reports:            https://github.com/robeverest/cufft/issues
 category:               Foreign
 build-type:             Custom
-cabal-version:          >= 1.22
+cabal-version:          >= 1.24
 tested-with:            GHC >= 7.6
 
 Extra-tmp-files:
@@ -34,7 +33,7 @@ Extra-source-files:
 custom-setup
   setup-depends:
       base              >= 4.6
-    , Cabal             >= 1.22
+    , Cabal             >= 1.24
     , cuda              >= 0.8
     , directory         >= 1.0
     , filepath          >= 1.0

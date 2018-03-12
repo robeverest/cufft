@@ -176,7 +176,7 @@ updateLibraryRPATHs :: Verbosity -> Platform -> FilePath -> [FilePath] -> IO ()
 updateLibraryRPATHs verbosity (Platform _ os) sharedLib extraLibDirs' =
   when (os == OSX) $ do
     exists <- doesFileExist sharedLib
-    unless exists $ die $ printf "Unexpected failure: library does not exist: %s" sharedLib
+    unless exists $ die' verbosity $ printf "Unexpected failure: library does not exist: %s" sharedLib
     --
     mint   <- findProgram verbosity "install_name_tool"
     case mint of
@@ -217,7 +217,7 @@ getHookedBuildInfo verbosity = do
           notice verbosity $ printf "Provide a '%s' file to override this behaviour" customBuildInfoFilePath
           readHookedBuildInfo verbosity generatedBuildInfoFilePath
         else
-          die $ printf "Unexpected failure: neither the default '%s' nor custom '%s' exist" generatedBuildInfoFilePath customBuildInfoFilePath
+          die' verbosity $ printf "Unexpected failure: neither the default '%s' nor custom '%s' exist" generatedBuildInfoFilePath customBuildInfoFilePath
 
 
 findProgram :: Verbosity -> FilePath -> IO (Maybe FilePath)
@@ -305,7 +305,7 @@ validateLinker verbosity (Platform X86_64 Windows) db = do
         Nothing        -> warn verbosity $ say "Unknown ld.exe version"
         Just ldVersion -> do
           debug verbosity $ "Found ld.exe version: " ++ show ldVersion
-          when (ldVersion < [2,25,1]) $ die (windowsLinkerBugMsg ldPath)
+          when (ldVersion < [2,25,1]) $ die' verbosity (windowsLinkerBugMsg ldPath)
 validateLinker _ _ _ = return () -- The linker bug is present only on Win64 platform
 
 
@@ -409,7 +409,7 @@ instance PPC2HS (BuildInfo -> LocalBuildInfo -> PreProcessor) where
       { platformIndependent = False
       , runPreProcessor     = \(inBaseDir, inRelativeFile)
                                (outBaseDir, outRelativeFile) verbosity ->
-          rawSystemProgramConf verbosity c2hsProgram (withPrograms lbi) . filter (not . null) $
+          runDbProgram verbosity c2hsProgram (withPrograms lbi) . filter (not . null) $
             maybe [] words (lookup "x-extra-c2hs-options" (customFieldsBI bi))
             ++ ["--include=" ++ outBaseDir]
             ++ ["--cppopts=" ++ opt | opt <- getCppOptions bi lbi]
@@ -448,5 +448,10 @@ versionInt v =
 #if MIN_VERSION_Cabal(1,25,0)
 versionBranch :: Version -> [Int]
 versionBranch = versionNumbers
+#endif
+
+#if !MIN_VERSION_Cabal(2,0,0)
+die' :: Verbosity -> String -> IO a
+die' _ = die
 #endif
 
