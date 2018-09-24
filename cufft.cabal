@@ -15,7 +15,7 @@ description:
 license:                BSD3
 license-file:           LICENSE
 author:                 Robert Clifton-Everest, Trevor L. McDonell
-maintainer:             Robert Clifton-Everest <robertce@cse.unsw.edu.au>
+maintainer:             Trevor L. McDonell <trevor.mcdonell@gmail.com>
 homepage:               https://github.com/robeverest/cufft
 bug-reports:            https://github.com/robeverest/cufft/issues
 category:               Foreign
