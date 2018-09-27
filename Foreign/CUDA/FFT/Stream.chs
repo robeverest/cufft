@@ -18,7 +18,7 @@ module Foreign.CUDA.FFT.Stream (
 ) where
 
 -- friends
-import Foreign.CUDA.Types
+import Foreign.CUDA.Driver.Stream                         ( Stream(..) )
 import Foreign.CUDA.FFT.Plan
 import Foreign.CUDA.FFT.Error
 import Foreign.CUDA.FFT.Internal.C2HS

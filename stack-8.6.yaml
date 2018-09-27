@@ -25,7 +25,7 @@ packages:
 
 extra-deps:
 - git:    https://github.com/tmcdonell/cuda.git
-  commit: c7a1aeadf069f61d8b8281dd364db5243bb00906
+  commit: a16ae2b339b811678d94555b8ee34a88ccccc61c
 
 - alex-3.2.4
 - dlist-0.8.0.4
