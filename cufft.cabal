@@ -1,5 +1,5 @@
 name:                   cufft
-version:                0.9.0.0
+version:                0.9.0.1
 synopsis:               Haskell bindings for the CUFFT library
 description:
     This library contains FFI bindings to the CUFFT library, which provides
@@ -75,6 +75,6 @@ Source-repository head
 source-repository this
     type:               git
     location:           https://github.com/robeverest/cufft
-    tag:                0.9.0.0
+    tag:                0.9.0.1
 
 -- vim: nospell
