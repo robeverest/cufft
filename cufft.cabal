@@ -1,5 +1,5 @@
 name:                   cufft
-version:                0.9.0.0
+version:                0.9.0.1
 synopsis:               Haskell bindings for the CUFFT library
 description:
     This library contains FFI bindings to the CUFFT library, which provides
@@ -15,7 +15,7 @@ description:
 license:                BSD3
 license-file:           LICENSE
 author:                 Robert Clifton-Everest, Trevor L. McDonell
-maintainer:             Robert Clifton-Everest <robertce@cse.unsw.edu.au>
+maintainer:             Trevor L. McDonell <trevor.mcdonell@gmail.com>
 homepage:               https://github.com/robeverest/cufft
 bug-reports:            https://github.com/robeverest/cufft/issues
 category:               Foreign
@@ -75,6 +75,6 @@ Source-repository head
 source-repository this
     type:               git
     location:           https://github.com/robeverest/cufft
-    tag:                0.9.0.0
+    tag:                v0.9.0.1
 
 -- vim: nospell
